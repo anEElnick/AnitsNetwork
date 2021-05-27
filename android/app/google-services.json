@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "275693150547",
+    "firebase_url": "https://anitsnetwork-be18a-default-rtdb.firebaseio.com",
+    "project_id": "anitsnetwork-be18a",
+    "storage_bucket": "anitsnetwork-be18a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:275693150547:android:412fbe69e99195493281a6",
+        "android_client_info": {
+          "package_name": "com.anitsnetwork"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "275693150547-cohgh8ii8mg0rmekq6gjuamevo8eqqk6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.anitsnetwork",
+            "certificate_hash": "928246aa273dc741d6cad15a2681ffe13ab21529"
+          }
+        },
+        {
+          "client_id": "275693150547-8210sv8ku175b5ff387ag5pd7qvoq39i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCSGCv3H_0a6l3ZwSbSupbp3LRqDEL0tc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "275693150547-8210sv8ku175b5ff387ag5pd7qvoq39i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
