@@ -21,7 +21,7 @@ const Stack = createStackNavigator();
 
 const ProfileStack = () =>{
     return (
-            <Stack.Navigator initialRouteName='Profile'>
+            <Stack.Navigator initialRouteName='Profile' headerMode='none' >
                 <Stack.Screen  name='Profile' component={Profile}  />
                 <Stack.Screen  name='EditProfile' component={EditProfile}  /> 
             </Stack.Navigator>    
@@ -35,6 +35,7 @@ export default () => {
   return (
        <Tab.Navigator
           tabBarOptions={{
+            keyboardHidesTabBar: true,
             showLabel: false,
             style: styles.container 
           }}

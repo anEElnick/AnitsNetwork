@@ -15,7 +15,8 @@ const PostCard = ({item}) =>{
                       <Text numberOfLines={1} style={{ width:win.width-45,fontSize:15}}><B> {item.username} </B>is with <B>{item.groups[0]}</B> and <B>{item.groups.length - 1}</B> others</Text>
                       <Text > { item.date } </Text>
                   </View>
-                  <Icon name="ios-bookmark-sharp"  size={40} style={{ position:'absolute',top:2,right:4}} />
+                 {// <Icon name="ios-bookmark-sharp"  size={40} style={{ position:'absolute',top:2,right:4}} />
+                 }
             </View>
             
            

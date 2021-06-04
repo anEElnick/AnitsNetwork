@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {useState} from 'react';
 import {
   View,
@@ -7,136 +7,214 @@ import {
   ImageBackground,
   Image,
   Button,
-  ScrollView
+  ScrollView,
+  Platform,
+  Text,
+  ActivityIndicator
 } from 'react-native';
-import { AuthContext } from '../../src/components/Context';
-
+import storage from '@react-native-firebase/storage';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import ImagePicker from 'react-native-image-crop-picker';
+import { AuthContext,UserDetails} from '../../src/components/Context';
+import {Pressable} from 'react-native';
 
 
 
 const EditProfile = () => {
-  const [name,setName] = useState('');
-  const [yoj ,setYOJ] = useState('');
+  
+  const data  = React.useContext(UserDetails);
+  var inititalProfileState = data;
+  console.log("in edit context data: "+data);
+  if(data == {}){
+       inititalProfileState = {
+               name:"",
+               YearOfJoining:'',
+               CollegeName:'Aneel',
+               SchoolName:'',
+               InterCollegeName:'',
+               LivesIn:'',
+               From:'',
+               bgpic:'',
+               profilepic:'',
+               Following:[],
+               Followers:[],
+               posts:[]
+       };
+  }else{
+    inititalProfileState = {
+      name:data.name,
+      YearOfJoining:data.YearOfJoining,
+      CollegeName:data.CollegeName,
+      SchoolName:data.SchoolName,
+      InterCollegeName:data.InterCollegeName,
+      LivesIn:data.LivesIn,
+      From:data.From,
+      bgpic:data.bgpic,
+      profilepic:data.profilepic,
+      Following:[],
+      Followers:[],
+      posts:[]
+   };
 
+  }
+
+  const [state,setState] = useState(inititalProfileState);
+  const [pimg,setPimg]= useState('');
+  const [uploading,setUploading]= useState(false);
+  const [transferred,setTransferred]= useState(0);
   const { signInAE } = React.useContext(AuthContext);
+
   const saveHandle = async( data )=> {
     console.log(data);
-    signInAE( data );
+    signInAE(data);
+
   };
+  
+  const takePicFromLib = async(data) =>{
+    var imageurl="";
+    try{
+       await ImagePicker.openPicker({cropping: true}).then(image => {
+         console.log(image);
+         const imageUri = Platform.OS ==='ios' ? image.sourceURL : image.path;
+         setPimg(imageUri);
+         console.log(imageUri);
+         imageurl = imageUri;
+       });
+      }
+    catch(e){
+      console.log('PIc not selected');
+      return;
+    }
+    let filename =  "Images/"+Date.now() + '.jpg';
+    var picurl="";
+    setUploading(true);
+    setTransferred(0);
+    console.log("pic dATA:"+filename);
+    const task = storage().ref(filename).putFile(imageurl);
+    
+    task.on('state_changed', taskSnapshot => {
+      console.log(`${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`);
+    
+      setTransferred(Math.round(taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *100);
+    
+    });
+    
+    task.then(async() => {
+      setUploading(false);
+      console.log('Image uploaded to the bucket!');
+      picurl = await storage().ref(filename).getDownloadURL();
+      if(data.picfor == "Profile") setState({...state,profilepic:picurl});
+      else setState({...state,bgpic:picurl})
+      console.log(picurl);
+      
+    });
+
+    
+  };
+  
+
   return (
     <View style={{ flex: 1 }}>
     <View style={{ height:130 }}>
-         <View style={{ flex:2}}>
-                   <ImageBackground source={{uri : 'https://reactnativecode.com/wp-content/uploads/2018/01/2_img.png'}} style={styles.coverimage} >
-                   </ImageBackground>
-         </View>
+        <View style={{ flex:2}}>
+          <Pressable style={{flex:1}} onPress={()=>takePicFromLib({picfor:"BG"})} >
+              <View style={{flex:1}}>
+                {
+                state.bgpic == '' ?( <ImageBackground source={{uri : 'https://reactnativecode.com/wp-content/uploads/2018/01/2_img.png'}} style={styles.coverimage} ></ImageBackground>)
+                :(<ImageBackground source={{uri : state.bgpic}} style={styles.coverimage} ></ImageBackground>)
+                }
+              </View>
+          </Pressable>
+        </View>
          <View style = { styles.MainContainer }>
-             <Image source={{uri : 'https://reactnativecode.com/wp-content/uploads/2018/01/2_img.png'}}
-                 style={{width: 130, height: 130, borderRadius: 120/2}} />
+        { uploading ? (
+           <View style={{width: 130, height: 130, borderRadius: 120/2}}>
+              <Text> {transferred} % Completed </Text>
+              <ActivityIndicator color="blue" size="large" ></ActivityIndicator>
+            </View>
+          ):(
+         <Pressable  onPress={()=>takePicFromLib({picfor:"Profile"})} >
+             {state.profilepic == '' ? <Image source={{uri : 'https://reactnativecode.com/wp-content/uploads/2018/01/2_img.png'}} style={{width: 130, height: 130, borderRadius: 120/2}} /> :
+                    <Image source={{uri : state.profilepic}} style={{width: 130, height: 130, borderRadius: 120/2}} />   
+             }
+         </Pressable>
+        )}
          </View>
+         
     </View>
     <View style={{ flex: 1 }}>
-    <ScrollView style={styles.container}>
+    <KeyboardAwareScrollView style={styles.container}>
         <View style={styles.inputGroup}>
           <TextInput
               placeholder={'Name'}
-              value={name}
-              onChangeText={setName}
+              value={state.name}
+              onChangeText={e => setState({ ...state,name:e})}
           />
         </View>
         <View style={styles.inputGroup}>
           <TextInput
-              multiline={true}
-              numberOfLines={4}
-              placeholder={'Email'}
-              value={name}
-              onChangeText={setName}
+              placeholder={'Year Of Joining'}
+              value={state.YearOfJoining}
+              onChangeText={e => setState({ ...state,YearOfJoining:e})}
           />
           
-        </View>
+        </View>       
         <View style={styles.inputGroup}>
           <TextInput
-              multiline={true}
-              numberOfLines={4}
-              placeholder={'Email'}
-              value={name}
-              onChangeText={setName}
+              placeholder={'College Name'}
+              value={state.CollegeName}
+              onChangeText={e => setState({ ...state,CollegeName:e})}
           />
           
-        </View>
+        </View> 
         <View style={styles.inputGroup}>
           <TextInput
-              multiline={true}
-              numberOfLines={4}
-              placeholder={'Email'}
-              value={name}
-              onChangeText={setName}
+              placeholder={'Inter College Name'}
+              value={state.InterCollegeName}
+              onChangeText={e => setState({ ...state,InterCollegeName:e})}
           />
           
-        </View>
+        </View> 
         <View style={styles.inputGroup}>
           <TextInput
-              multiline={true}
-              numberOfLines={4}
-              placeholder={'Email'}
-              value={name}
-              onChangeText={setName}
+              placeholder={'School Name'}
+              value={state.SchoolName}
+              onChangeText={e => setState({ ...state,SchoolName:e})}
           />
           
-        </View>
+        </View> 
         <View style={styles.inputGroup}>
           <TextInput
-              multiline={true}
-              numberOfLines={4}
-              placeholder={'Email'}
-              value={name}
-              onChangeText={setName}
+              placeholder={'Lives In'}
+              value={state.LivesIn}
+              onChangeText={e => setState({ ...state,LivesIn:e})}
           />
           
-        </View>
+        </View> 
         <View style={styles.inputGroup}>
           <TextInput
-              multiline={true}
-              numberOfLines={4}
-              placeholder={'Email'}
-              value={name}
-              onChangeText={setName}
+              placeholder={'From'}
+              value={state.From}
+              onChangeText={e => setState({ ...state,From:e})}
           />
           
-        </View>
-        <View style={styles.inputGroup}>
-          <TextInput
-              multiline={true}
-              numberOfLines={4}
-              placeholder={'Email'}
-              value={name}
-              onChangeText={setName}
-          />
-          
-        </View>
-        <View style={styles.inputGroup}>
-          <TextInput
-              placeholder={'Mobile'}
-              value={name}
-              onChangeText={setName}
-          />
-        </View>
+        </View> 
         <View style={styles.button}>
           <Button
-            title='Add User'
-            onPress={()=>{}} 
+            title='Submit'
+            onPress={()=>{saveHandle(state)}} 
             color="#19AC52"
           />
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
       
     </View>
    
   </View>
     
   );
+ 
 };
-
 const styles = StyleSheet.create(
   {
     coverimage: {
@@ -183,4 +261,3 @@ const styles = StyleSheet.create(
 
 
 export default EditProfile;
-
