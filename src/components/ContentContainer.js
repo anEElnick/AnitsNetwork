@@ -1,62 +1,102 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
-  FlatList
+  FlatList, RefreshControl, View,ActivityIndicator
 } from 'react-native';
-import images from '../../assets/images';
-import colors from '../../assets/colors';
+import firestore from '@react-native-firebase/firestore';
+import PostCard from '../components/PostCard';
 
-import PostCard from '../components/PostCard'
-
-
+import { Posts } from '../components/Context';
 
 
-const datas = [
-  {
-    username: 'billgates',
-    profile: images.profile.profileGates,
-    text:"Love. It's chemical, it's elusive, and ephemeral. It's so powerful that it can be hard to describe...",
-    image: images.images.pic1,
-    likes: ["Aneel",'Anjith','vamsi','neeraj'],
-    comments: ["Aneel",'Anjith','vamsi','neeraj'],
-    shares:45,
-    date: "2021/5/08",
-    groups: ["2018CSEA",'Anjith','vamsi','neeraj']
-  },
-  {
-    username: 'Musk',
-    profile: images.profile.profileMusk,
-    text:"Love. It's chemical, it's elusive, and ephemeral. It's so powerful that it can be hard to describe...",
-    image: images.images.pic4,
-    likes: ["Aneel",'Anjith','vamsi','neeraj'],
-    comments: ["Aneel",'Anjith','vamsi','neeraj'],
-    shares:45,
-    date: "2021/5/08",
-    groups: ["2018CSEA",'Anjith','vamsi','neeraj']
-  },
-  {
-    username: 'markzuckerberg',
-    profile: images.profile.profileMark,
-    text:"Love. It's chemical, it's elusive, and ephemeral. It's so powerful that it can be hard to describe...",
-    image: images.images.pic5,
-    likes: ["Aneel",'Anjith','vamsi','neeraj'],
-    comments: ["Aneel",'Anjith','vamsi','neeraj'],
-    shares:45,
-    date: "2021/5/08",
-    groups: ["2018CSEA",'Anjith','vamsi','neeraj']
-  },
+
+
+export default (props) => {
+  const  [posts,setPosts ]= React.useState(null);
+  const  [loading,setLoading] = React.useState(true);
+  const [refreshing, setRefreshing] = React.useState(false);
+  //console.log(props.data);
+  const fetchPosts = async() =>{
+
+    try{
+    var datas = [];
+    if(props.data.profile == false){
+      //console.log(props.data.tokens);
+      var tok = [];
+      props.data.tokens.forEach(element => {
+        tok.push(element.usertoken);
+      });
+      await firestore().collection("Posts").orderBy("postDateTime", "desc").get().then((snapshot)=>{
+        snapshot.docs.map((docs)=>{
+          //console.log(docs.data());
+          let d = docs.data();
+          d.id = docs.id;
+          if(tok.includes(d.postBy)){
+          datas.push(d);
+          }
+        })
+      });
+    }else{
+      await firestore().collection("Posts").where("postBy","==",props.data.token).get().then((snapshot)=>{
+        snapshot.docs.map((docs)=>{
+          //console.log(docs.data());
+          let d = docs.data();
+          d.id = docs.id;
+          datas.push(d);
+        })
+       });
+    }
+    
+
+    setPosts(datas);
+    setLoading(false);
+
+  }catch(e){
+    console.log(e);
+  }
+
+  };
   
-];
 
-export default ( {HeaderComponent,data}) => {
-  
+  React.useEffect(()=>{
+    setLoading(true);
+    fetchPosts();
+  },[]);
+  //console.log("datas");
+  //console.log(posts);
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    fetchPosts();
+    setTimeout(()=>{
+      setRefreshing(false);
+    },20)
+    //wait(2000).then(() => setRefreshing(false));
+  }, []);
+
   return (
-    <FlatList
-      data={datas}
-      keyExtractor={item => item.username}
-      renderItem={PostCard}
+    <Posts.Provider value = {{ pd : posts }}>
+    {
+      
+    loading==true ? ( 
+      <View style={{flex:1}}>
+          <ActivityIndicator color='#fff' size="large"  />
+      </View>):(
+    <FlatList 
+      data={posts}
+      keyExtractor={item => item.id}
+      renderItem={object => <PostCard  item = {object.item}/>}
       showsVerticalScrollIndicator={false}
-      ListHeaderComponent={()=><HeaderComponent data={data}/>}
+      ListHeaderComponent={()=><props.HeaderComponent />}
+      refreshControl ={
+        <RefreshControl 
+             refreshing={refreshing}
+             onRefresh ={onRefresh}
+        />
+      }
     />
+    
+    )
+    }
+    </Posts.Provider>
   );
 };
 

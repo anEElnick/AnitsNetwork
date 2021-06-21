@@ -42,6 +42,7 @@ const App = ()  => {
                   //console.log("in reducer "+action.token);
                   return {
                     ...prevState,
+                    userName:  action.id,
                     userToken: action.token,
                     isLoading: false,
                     isFirstLogin: true
@@ -99,6 +100,7 @@ const App = ()  => {
                     console.log(firstTimelogin);  
                     try{
                         await AsyncStorage.setItem('userToken',usertoken);
+                        await AsyncStorage.setItem('rollno',userName);
                     } catch (e) {
                           // saving 
                     } 
@@ -106,6 +108,7 @@ const App = ()  => {
                     
                       dispatch({type:'FIRST_LOGIN',id: userName,token:usertoken,isFirstLogin:true});
                     }else{
+                          UserData.usertoken = usertoken;
                           dispatch({type:'SETUSERDATA',data:UserData});
                           dispatch({type:'LOGIN',id: userName,token:usertoken});
                          
@@ -125,8 +128,12 @@ const App = ()  => {
           },
           signInAE:async( data )=> {
              const userToken = await AsyncStorage.getItem('userToken');
+             const rollno = await AsyncStorage.getItem('rollno');
+             data.rollno = rollno;
+             console.log("data:",data);
              await firestore().collection('UserDetails').doc(userToken).set(data);
              alert("Data Updated");
+             data.usertoken = userToken;
              dispatch({type:'SETUSERDATA',data:data});
              dispatch({type:'LOGINAE'});
           }    
@@ -140,13 +147,17 @@ const App = ()  => {
       } catch (e) {
         // saving 
       }
+      if(userToken != null){
       var UserData={};
       await firestore().collection('UserDetails').doc(userToken).get().then(snapshot => {
           UserData = snapshot.data();
-          console.log("in App.js 145 "+snapshot.data());
+          //console.log("in App.js 145 "+JSON.stringify(snapshot.data()));
       });
+      UserData.usertoken = userToken;
       dispatch({type:'SETUSERDATA',data:UserData});
+    }
       dispatch({type:'RETRIVE_TOKEN',token:userToken});},1000);
+
   },[]);
 
   if( loginState.isLoading ){
@@ -158,7 +169,7 @@ const App = ()  => {
  
   
 
-  console.log("in app "+ loginState.data );
+  console.log("in app "+ JSON.stringify(loginState.data ));
   console.log("in app "+ loginState.userToken);
   return (
     <UserDetails.Provider value={loginState.data}>

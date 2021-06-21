@@ -25,15 +25,16 @@ const EditProfile = () => {
   const data  = React.useContext(UserDetails);
   var inititalProfileState = data;
   console.log("in edit context data: "+data);
-  if(data == {}){
+  if(data == null){
        inititalProfileState = {
                name:"",
                YearOfJoining:'',
-               CollegeName:'Aneel',
+               branch:'',
+               section:'',
+               CollegeName:'ANITS',
                SchoolName:'',
                InterCollegeName:'',
                LivesIn:'',
-               From:'',
                bgpic:'',
                profilepic:'',
                Following:[],
@@ -44,11 +45,12 @@ const EditProfile = () => {
     inititalProfileState = {
       name:data.name,
       YearOfJoining:data.YearOfJoining,
+      branch:data.branch,
+      section:data.section,
       CollegeName:data.CollegeName,
       SchoolName:data.SchoolName,
       InterCollegeName:data.InterCollegeName,
       LivesIn:data.LivesIn,
-      From:data.From,
       bgpic:data.bgpic,
       profilepic:data.profilepic,
       Following:[],
@@ -59,7 +61,6 @@ const EditProfile = () => {
   }
 
   const [state,setState] = useState(inititalProfileState);
-  const [pimg,setPimg]= useState('');
   const [uploading,setUploading]= useState(false);
   const [transferred,setTransferred]= useState(0);
   const { signInAE } = React.useContext(AuthContext);
@@ -76,13 +77,13 @@ const EditProfile = () => {
        await ImagePicker.openPicker({cropping: true}).then(image => {
          console.log(image);
          const imageUri = Platform.OS ==='ios' ? image.sourceURL : image.path;
-         setPimg(imageUri);
+         //setState({...state,profilepic:});
          console.log(imageUri);
          imageurl = imageUri;
        });
       }
     catch(e){
-      console.log('PIc not selected');
+      console.log(e);
       return;
     }
     let filename =  "Images/"+Date.now() + '.jpg';
@@ -158,7 +159,23 @@ const EditProfile = () => {
               onChangeText={e => setState({ ...state,YearOfJoining:e})}
           />
           
-        </View>       
+        </View> 
+        <View style={{...styles.inputGroup,flexDirection:"row"}}>
+          <View style={{flex:1,borderRightWidth:1,borderRightColor:"lightgrey"}}>
+          <TextInput
+              placeholder={'Branch'}
+              value={state.branch}
+              onChangeText={e => setState({ ...state,branch:e})}
+          />
+          </View>
+          <View style={{flex:1}}>
+           <TextInput
+              placeholder={'Section'}
+              value={state.section}
+              onChangeText={e => setState({ ...state,section:e})}
+          />
+          </View>
+        </View>        
         <View style={styles.inputGroup}>
           <TextInput
               placeholder={'College Name'}
@@ -190,15 +207,7 @@ const EditProfile = () => {
               onChangeText={e => setState({ ...state,LivesIn:e})}
           />
           
-        </View> 
-        <View style={styles.inputGroup}>
-          <TextInput
-              placeholder={'From'}
-              value={state.From}
-              onChangeText={e => setState({ ...state,From:e})}
-          />
-          
-        </View> 
+        </View>  
         <View style={styles.button}>
           <Button
             title='Submit'

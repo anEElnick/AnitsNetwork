@@ -14,8 +14,9 @@ import CreatePost from '../../src/screens/Createpost';
 import Profile from '../../src/screens/Profile';
 import Search from '../../src/screens/Search';
 import Notifications from '../../src/screens/Notifications';
+import UserProfile from '../screens/UserProfile';
 
-const {width} = Dimensions.get('window');
+
 
 const Stack = createStackNavigator();
 
@@ -28,6 +29,17 @@ const ProfileStack = () =>{
           
     );
 };
+
+
+const SearchStack = () =>{
+  return (
+    <Stack.Navigator initialRouteName='Search' headerMode='none' >
+        <Stack.Screen  name='UserProfile' component={UserProfile}  />
+        <Stack.Screen  name='Search' component={Search}  /> 
+    </Stack.Navigator>    
+);    
+};
+
 
 const Tab = createBottomTabNavigator();
 
@@ -45,7 +57,7 @@ export default () => {
                    <Icon name="ios-home"  size={35} />
               )
             }}/>
-            <Tab.Screen name="Search" component={Search} options={{
+            <Tab.Screen name="Search" component={SearchStack} options={{
               tabBarIcon:() => ( 
                    <Icon name="ios-search"  size={35} />
               )

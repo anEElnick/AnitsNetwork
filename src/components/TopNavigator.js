@@ -15,6 +15,7 @@ import IconButton from './IconButton';
 
 
 const TopNavigator = ( { navigation }) => {
+ 
   return (
     <SafeAreaView style={styles.container}>
       <View style = {{ flexDirection:'row', alignItems:'flex-start'}} >
@@ -31,8 +32,7 @@ const TopNavigator = ( { navigation }) => {
             name="chatbubbles-sharp"
             size={36}
             color="black"
-            onPress = {() => navigation.navigate("Profile") }
-          />
+            onPress = {() => alert("this is implemented in future versions")}         />
         </View> 
       </View>
     </SafeAreaView>
